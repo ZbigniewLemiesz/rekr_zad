@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
@@ -14,11 +15,6 @@ class IntField extends TextField {
     final private IntegerProperty value;
     final private int minValue;
     final private int maxValue;
-
-    // expose an integer value property for the text field.
-    public int  getValue()                 { return value.getValue(); }
-    public void setValue(int newValue)     { value.setValue(newValue); }
-    public IntegerProperty valueProperty() { return value; }
 
     IntField(int minValue, int maxValue, int initialValue) {
         if (minValue > maxValue)
@@ -39,13 +35,18 @@ class IntField extends TextField {
         this.maxValue = maxValue;
         value = new SimpleIntegerProperty(initialValue);
         setText(initialValue + "");
+        // initialize the field properties
+        this.setAlignment(Pos.BASELINE_LEFT);
+        this.setPrefWidth(50);
 
         final IntField intField = this;
+
 
         // make sure the value property is clamped to the required range
         // and update the field's text to be in sync with the value.
         value.addListener(new ChangeListener<Number>() {
-            @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 if (newValue == null) {
                     intField.setText("");
                 } else {
@@ -70,13 +71,13 @@ class IntField extends TextField {
 
         // restrict key input to numerals.
         this.addEventFilter(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
-            @Override public void handle(KeyEvent keyEvent) {
-                if(intField.minValue<0) {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if (intField.minValue < 0) {
                     if (!"-0123456789".contains(keyEvent.getCharacter())) {
                         keyEvent.consume();
                     }
-                }
-                else {
+                } else {
                     if (!"0123456789".contains(keyEvent.getCharacter())) {
                         keyEvent.consume();
                     }
@@ -86,8 +87,9 @@ class IntField extends TextField {
 
         // ensure any entered values lie inside the required range.
         this.textProperty().addListener(new ChangeListener<String>() {
-            @Override public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-                if (newValue == null || "".equals(newValue) || (intField.minValue<0 && "-".equals(newValue))) {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+                if (newValue == null || "".equals(newValue) || (intField.minValue < 0 && "-".equals(newValue))) {
                     value.setValue(0);
                     return;
                 }
@@ -101,5 +103,18 @@ class IntField extends TextField {
                 value.set(Integer.parseInt(textProperty().get()));
             }
         });
+    }
+
+    // expose an integer value property for the text field.
+    public int getValue() {
+        return value.getValue();
+    }
+
+    public void setValue(int newValue) {
+        value.setValue(newValue);
+    }
+
+    public IntegerProperty valueProperty() {
+        return value;
     }
 }
